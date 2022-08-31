@@ -1,0 +1,72 @@
+name: Build site and deploy
+
+on:
+  pull_request:
+    branches:
+      - main
+      - fork_merge
+  push:
+    branches: 
+      - main
+  schedule:
+    - cron: "0 */12 * * *"
+
+jobs:
+  vars:
+    name: Get job variables
+    runs-on: macOS-latest
+    outputs:
+      cmt_msg: ${{ steps.cmt_msg.outputs.value }}
+      hugo_vr: ${{ steps.hugo_vr.outputs.value }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          
+      - name: Get commit message
+        id: cmt_msg
+        run: |
+          MSG=$(git log --format=%B -n 1 ${{ github.event.after }})
+          echo $MSG
+          echo "::set-output name=value::${MSG}"
+        
+
+  build:
+    name: Build and publish to Netlify
+    runs-on: macOS-latest
+    needs: [vars, jsons, meetup]
+    if: |
+      (github.event_name != 'pull_request' || 
+      github.event.pull_request.head.repo.full_name == github.repository) &&
+      ${{ always() && !(contains(needs.*.result, 'failure')) }} 
+    env:
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v2
+        with:
+          hugo-version: 0.101.0
+          extended: true
+      
+      - name: Install netlify cli
+        run: npm install netlify-cli -g
+               
+      - name: Build
+        run: hugo --enableGitInfo
+        
+      - name: Deploy Netlify preview
+        if: github.event_name == 'pull_request' && contains(needs.vars.outputs.cmt_msg , 'preview')
+        run: netlify deploy
+        shell: sh
+
+      - name: Deploy Netlify production
+        if: github.event_name != 'pull_request'
+        run: netlify deploy --prod
+        shell: sh
+
