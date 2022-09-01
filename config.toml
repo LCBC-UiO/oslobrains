@@ -6,7 +6,7 @@ theme = "hugo-serif-theme"
 [module]
   [module.hugoVersion]
     extended = true
-    min = "0.55.0"
+    min = "0.101.0"
     
 [params]
   # In most cases you will only want to use either one of these. If you have Google Analytics included in your GTM tags don't put your GA ID here. Otherwise your data might be useless.
@@ -14,11 +14,11 @@ theme = "hugo-serif-theme"
   google_tag_manager_id = ""
 
   [params.homepage]
-    show_contact_box = true # show / hide the contaxt box on the homepage
+    show_contact_box = false # show / hide the contaxt box on the homepage
     show_services_button = true  # show / hide the "view all services" button
 
   [params.logo]
-    mobile = "images/logo/logo-logo_oneline.svg"
+    mobile = "img/logo/logo_oneline.svg"
     mobile_height = "50px"
     desktop = "img/logo/logo_oneline.svg"
     desktop_height = "50px"
@@ -26,19 +26,19 @@ theme = "hugo-serif-theme"
 
   [params.seo]
     meta_twitter_site = "@lcbc_uio"
-    meta_twitter_creator = "@zerostaticio"
+    meta_twitter_creator = "@drmowinckels"
 
   [params.team]
     summary_large_truncate = 120  # How many characters to include in the summary of the team bios (large layout) before truncating
 
   [params.footer]
-    copyright_text = 'LCBC footer text'
+    copyright_text = 'ccby0 @LCBC 2022'
 
 [menu]
   # Main Menu
   [[menu.main]]
-    name = "Services"
-    url = "/services/"
+    name = "Projects"
+    url = "/projects/"
       weight = 1
 
   [[menu.main]]
