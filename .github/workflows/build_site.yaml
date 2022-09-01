@@ -64,7 +64,7 @@ jobs:
         run: hugo --enableGitInfo --minify
 
       - name: Deploy Netlify preview
-        # if: github.event_name == 'pull_request' && contains(needs.vars.outputs.cmt_msg , 'preview')
+        if: github.event_name == 'pull_request' && contains(needs.vars.outputs.cmt_msg , 'preview')
         run: netlify deploy
         shell: sh
 
