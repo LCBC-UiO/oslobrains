@@ -6,40 +6,40 @@ on:
       - main
       - fork_merge
   push:
-    branches: 
+    branches:
       - main
-  schedule:
-    - cron: "0 */12 * * *"
+#  schedule:
+#    - cron: "0 */12 * * *"
+  workflow_dispatch:
 
 jobs:
   vars:
     name: Get job variables
-    runs-on: macOS-latest
+    runs-on: ubuntu-20.04
     outputs:
       cmt_msg: ${{ steps.cmt_msg.outputs.value }}
-      hugo_vr: ${{ steps.hugo_vr.outputs.value }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-          
+
       - name: Get commit message
         id: cmt_msg
         run: |
           MSG=$(git log --format=%B -n 1 ${{ github.event.after }})
           echo $MSG
           echo "::set-output name=value::${MSG}"
-        
+
 
   build:
     name: Build and publish to Netlify
-    runs-on: macOS-latest
-    needs: [vars, jsons, meetup]
+    runs-on: ubuntu-20.04
+    needs: [vars]
     if: |
-      (github.event_name != 'pull_request' || 
+      (github.event_name != 'pull_request' ||
       github.event.pull_request.head.repo.full_name == github.repository) &&
-      ${{ always() && !(contains(needs.*.result, 'failure')) }} 
+      ${{ always() && !(contains(needs.*.result, 'failure')) }}
     env:
       NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
       NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
@@ -48,18 +48,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Update theme
+        run: git submodule update --init --recursive
+
       - name: Setup Hugo
         uses: peaceiris/actions-hugo@v2
         with:
-          hugo-version: 0.101.0
+          hugo-version: '0.102.3'
           extended: true
-      
+
       - name: Install netlify cli
         run: npm install netlify-cli -g
-               
+
       - name: Build
-        run: hugo --enableGitInfo
-        
+        run: hugo --enableGitInfo --gc --minify
+
       - name: Deploy Netlify preview
         if: github.event_name == 'pull_request' && contains(needs.vars.outputs.cmt_msg , 'preview')
         run: netlify deploy
