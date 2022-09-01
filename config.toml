@@ -34,6 +34,9 @@ theme = "hugo-serif-theme"
   [params.footer]
     copyright_text = 'ccby0 @LCBC 2022'
 
+  [params.fonts]
+    google_fonts = "https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200;0,300;0,400;1,300&display=swap"
+
 [menu]
   # Main Menu
   [[menu.main]]
