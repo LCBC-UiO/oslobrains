@@ -8,8 +8,8 @@ on:
   push:
     branches:
       - main
-  schedule:
-    - cron: "0 */12 * * *"
+#  schedule:
+#    - cron: "0 */12 * * *"
   workflow_dispatch:
 
 jobs:
@@ -61,15 +61,15 @@ jobs:
         run: npm install netlify-cli -g
 
       - name: Build
-        run: hugo --enableGitInfo --minify
+        run: hugo --enableGitInfo --gc --minify
 
       - name: Deploy Netlify preview
-        # if: github.event_name == 'pull_request' && contains(needs.vars.outputs.cmt_msg , 'preview')
+        if: github.event_name == 'pull_request' && contains(needs.vars.outputs.cmt_msg , 'preview')
         run: netlify deploy
         shell: sh
 
-#      - name: Deploy Netlify production
-#        if: github.event_name != 'pull_request'
-#        run: netlify deploy --prod
-#        shell: sh
+      - name: Deploy Netlify production
+        if: github.event_name != 'pull_request' github.event.pull_request.merged == true
+        run: netlify deploy --prod
+        shell: sh
 
